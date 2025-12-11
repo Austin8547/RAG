@@ -12,7 +12,7 @@ if GOOGLE_API_KEY is None:
 EMBEDDING_MODEL = "models/text-embedding-004"
 LLM_MODEL = "gemini-2.5-flash"
 
-CHUNK_SIZE= 500
+CHUNK_SIZE= 600
 CHUNK_OVERLAP=80
 
 # paths

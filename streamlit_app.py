@@ -12,8 +12,8 @@ from src.ragchain.rag_chain import run_chain
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(
     page_title="Kerala University Admission Assistant",
-    page_icon="🎓",
-    layout="centered",
+    page_icon="static/logo.png",
+    layout="wide",
 )
 
 # ------------------ FUNCTIONS ------------------
@@ -21,6 +21,30 @@ def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
     return base64.b64encode(data).decode()
+
+# ------------------ SIDEBAR ------------------
+with st.sidebar:
+    if os.path.exists("static/logo.png"):
+        st.image("static/logo.png", width=150)
+    
+    st.title("Options")
+    
+    # Clear Chat Button
+    if st.button("🗑️ Clear Chat", type="primary"):
+        st.session_state.messages = []
+        st.rerun()
+    
+    st.divider()
+    
+    st.subheader("📜 Session History")
+    if "messages" in st.session_state and st.session_state.messages:
+        for i, msg in enumerate(st.session_state.messages):
+            if msg["role"] == "user":
+                # Truncate long messages for the sidebar
+                display_text = (msg['content'][:40] + '...') if len(msg['content']) > 40 else msg['content']
+                st.caption(f"👤 {display_text}")
+    else:
+        st.caption("No history yet.")
 
 # ------------------ BACKGROUND & CSS ------------------
 # Adds your logo as the background (covers whole page)
@@ -30,7 +54,7 @@ if os.path.exists("static/logo.png"):
         <style>
             .stApp {{
                 background-image: url("data:image/png;base64,{bin_str}");
-                background-size: 20%; /* Watermark style: even smaller size */
+                background-size: 20%; /* Watermark style */
                 background-repeat: no-repeat;
                 background-attachment: fixed;
                 background-position: center;
@@ -44,7 +68,7 @@ if os.path.exists("static/logo.png"):
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(255, 255, 255, 0.90); /* Increased opacity for watermark feel */
+                background: rgba(255, 255, 255, 0.93);
                 z-index: -1;
             }}
         </style>
@@ -70,18 +94,27 @@ st.markdown("""
 
         /* Adjust container padding to prevent content from being hidden behind fixed input */
         .block-container {
-            padding-bottom: 100px;
-            padding-top: 1rem;
+            padding-bottom: 120px;
+            padding-top: 2rem;
+        }
+        
+        /* Chat bubble styling */
+        .stChatMessage {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
     </style>
 """, unsafe_allow_html=True)
 
 
-# ------------------ APP TITLE & LOGO ------------------
-
-st.markdown("<h1 style='text-align: center;'>Kerala University Admission Assistant </h1>",
-            unsafe_allow_html=True)
-
+# ------------------ APP TITLE ------------------
+col1, col2, col3 = st.columns([1, 6, 1])
+with col2:
+    st.markdown("<h1 style='text-align: center;'>Kerala University Admission Assistant </h1>",
+                unsafe_allow_html=True)
 
 
 # ------------------ CHAT HISTORY ------------------
@@ -112,3 +145,6 @@ if prompt:
     # Display response
     st.chat_message("assistant").markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
+    
+    # Rerun to update sidebar history immediately
+    st.rerun()
